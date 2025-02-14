@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { DashboardLayout } from "@/components/dashboard-layout"
-import { LeftPanel } from "@/components/left-panel"
-import { RightPanel } from "@/components/right-panel"
-import { ApiKeyInput } from "@/components/api-key-input"
-import { ActionButtons } from "@/components/action-buttons"
+import { useState } from "react";
+import { DashboardLayout } from "../components/dashboard-layout";
+import { LeftPanel } from "../components/left-panel";
+import { RightPanel } from "../components/right-panel";
+import { ApiKeyInput } from "../components/api-key-input";
+import { ActionButtons } from "../components/action-buttons";
 
 export default function DashboardPage() {
-  const [isApiKeyValid, setIsApiKeyValid] = useState(false)
+  const [isApiKeyValid, setIsApiKeyValid] = useState(false);
 
   const handleApiKeyValidation = (isValid: boolean) => {
-    setIsApiKeyValid(isValid)
-  }
+    setIsApiKeyValid(isValid);
+  };
 
   return (
     <DashboardLayout>
@@ -23,6 +23,5 @@ export default function DashboardPage() {
       </div>
       <ActionButtons isEnabled={isApiKeyValid} />
     </DashboardLayout>
-  )
+  );
 }
-
