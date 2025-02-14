@@ -5,12 +5,12 @@ import { PdfUpload } from "@/components/pdf-upload"
 export function LeftPanel() {
   return (
     <div className="w-full md:w-1/2 space-y-6 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-lg">
-      <div>
+      {/* <div>
         <Label htmlFor="pdf-upload" className="text-lg font-medium mb-2 block text-purple-600 dark:text-purple-400">
           Upload Your Brain Fuel (PDF)
         </Label>
         <PdfUpload id="pdf-upload" />
-      </div>
+      </div> */}
       <div>
         <Label htmlFor="text-input" className="text-lg font-medium mb-2 block text-pink-600 dark:text-pink-400">
           Inject Your Thoughts
