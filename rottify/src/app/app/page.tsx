@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { DashboardLayout } from "../components/dashboard-layout";
-import { LeftPanel } from "../components/left-panel";
-import { RightPanel } from "../components/right-panel";
-import { ApiKeyInput } from "../components/api-key-input";
-import { ActionButtons } from "../components/action-buttons";
+import { DashboardLayout } from "@/components/dashboard-layout";
+import { LeftPanel } from "@/components/left-panel";
+import { RightPanel } from "@/components/right-panel";
+import { ApiKeyInput } from "@/components/api-key-input";
+import { ActionButtons } from "@/components/action-buttons";
 
 export default function DashboardPage() {
   const [isApiKeyValid, setIsApiKeyValid] = useState(false);
