@@ -20,7 +20,7 @@ export async function POST(req) {
         // console.log("🔑 Using API Key:", client.apiKey.slice(0, 5) + "*****"); // Log only first 5 characters for debugging
         const voiceId = "JBFqnCBsd6RMkjVDRZzb"; // Your ElevenLabs voice ID
         const modelId = "eleven_multilingual_v2";
-        const outputFormat = "mp3_44100_128";
+        const outputFormat = "mp3_22050_32";
 
         const responseStream = await client.textToSpeech.convert(voiceId, {
             output_format: outputFormat,

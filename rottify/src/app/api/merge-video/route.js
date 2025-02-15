@@ -1,6 +1,6 @@
-import { exec } from "child_process";
-import path from "path";
-import fs from "fs-extra";
+import { createFFmpeg } from '@ffmpeg/ffmpeg'; // Only import createFFmpeg
+import path from 'path';
+import fs from 'fs-extra';
 
 export async function POST(req) {
     try {
@@ -9,9 +9,9 @@ export async function POST(req) {
             return new Response("Missing audio file", { status: 400 });
         }
 
-        // Step 1: Decode Base64 audio and save it as a file
+        // Step 1: Decode Base64 audio and save it as a .wav file
         const audioBuffer = Buffer.from(audioUrl.split(",")[1], "base64"); // Remove data URL prefix and decode Base64
-        const audioPath = path.join(process.cwd(), "public", "speech.mp3");
+        const audioPath = path.join(process.cwd(), "public", "speech.wav");  // Save audio as .wav
         fs.writeFileSync(audioPath, audioBuffer);
         console.log("✅ Audio file saved:", audioPath);
 
@@ -25,22 +25,29 @@ export async function POST(req) {
         const videoPath = path.join(videoFolder, randomVideo);
         const outputPath = path.join(videoFolder, "final_video.mp4");
 
-        // Step 4: Run FFmpeg command to merge video + audio
-     const command = '';
+        // Step 4: Use ffmpeg.wasm to merge video + audio
+        const ffmpeg = createFFmpeg({ log: true }); // Make sure to pass options if needed
+        await ffmpeg.load();
 
-        return new Promise((resolve) => {
-            exec(command, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`❌ Error merging video and audio: ${error.message}`);
-                    console.error("FFmpeg stderr:", stderr);
-                    resolve(new Response("Error merging video", { status: 500 }));
-                } else {
-                    console.log("✅ Video and audio merged successfully.");
-                    console.log("FFmpeg stdout:", stdout);
-                    resolve(new Response(JSON.stringify({ outputPath: "final_video.mp4" }), { status: 200 }));
-                }
-            });
-        });
+        // Step 5: Write video and audio files to FFmpeg's virtual file system
+        ffmpeg.FS('writeFile', 'video.mp4', fs.readFileSync(videoPath)); // Read the video file as a Buffer and write to FFmpeg FS
+        ffmpeg.FS('writeFile', 'audio.wav', fs.readFileSync(audioPath)); // Read the audio file as a Buffer and write to FFmpeg FS
+
+        // Step 6: Run FFmpeg to merge the video and audio
+        await ffmpeg.run('-i', 'video.mp4', '-i', 'audio.wav', '-c:v', 'copy', '-shortest', 'output.mp4');
+
+        // Step 7: Read the output video file
+        let data = await ffmpeg.FS('readFile', 'output.mp4');
+        
+        // Step 8: Convert the output data to a Uint8Array
+        const outputBuffer = new Uint8Array(data.buffer);
+        
+        // Step 9: Write the merged video to disk
+        fs.writeFileSync(outputPath, outputBuffer);
+
+        console.log("✅ Video and audio merged successfully.");
+        
+        return new Response(JSON.stringify({ outputPath: "final_video.mp4" }), { status: 200 });
     } catch (error) {
         console.error("❌ Error merging video and audio:", error);
         return new Response("Error merging video and audio", { status: 500 });
