@@ -18,7 +18,7 @@ export async function POST(req: NextApiRequest) {
   }
 
   try {
-    const videoPath = path.join(process.cwd(), "public/videos/final_video.mp4");
+    const videoPath = path.join(process.cwd(), "public/final_video.mp4");
 
     if (!fs.existsSync(videoPath)) {
       return new Response(
