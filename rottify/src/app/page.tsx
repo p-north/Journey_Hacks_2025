@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { DashboardLayout } from "@/components/dashboard-layout";
 import { LeftPanel } from "@/components/left-panel";
 import { RightPanel } from "@/components/right-panel";
@@ -9,15 +9,43 @@ import { ActionButtons } from "@/components/action-buttons";
 
 export default function DashboardPage() {
   const [isApiKeyValid, setIsApiKeyValid] = useState(false);
+  const [content, setContent] = useState("");
+  const [script, setScript] = useState("");
+
+  const handleTextContent = (e: ChangeEvent) => {
+    setContent((e) => e.target.value);
+  };
 
   const handleApiKeyValidation = (isValid: boolean) => {
     setIsApiKeyValid(isValid);
   };
 
+  const handleScriptGeneration = async () => {
+    if (!content) return;
+    try {
+      const response = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: prompt }),
+      });
+      const data = await response.json();
+      if (data.script) {
+        setScript(data.script);
+      }
+    } catch (error) {
+      console.error("Error generating script");
+    }
+  };
+
+  <button onClick={handleScriptGeneration}>Generate Script</button>;
+
   return (
     <DashboardLayout>
       <ApiKeyInput onValidation={handleApiKeyValidation} />
       <div className="flex flex-col md:flex-row gap-6 mt-6">
+        <input type="text" onChange={(e) => handleTextContent(e)}></input>
         <LeftPanel />
         <RightPanel />
       </div>
@@ -27,7 +55,6 @@ export default function DashboardPage() {
 }
 
 // "use client"; // Add this line at the top to make it a client component
-
 
 // import { useState } from "react";
 
@@ -80,5 +107,3 @@ export default function DashboardPage() {
 //     </div>
 //   );
 // }
-
-
