@@ -1,28 +1,65 @@
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PdfUpload } from "@/components/pdf-upload";
 
 export function LeftPanel() {
   const [text, setText] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleTextChange = (e: any) => setText(e.target.value);
 
-  const handleGenerateAudio = async () => {
+  // Step 1: Generate Script from Text
+  const handleGenerateScript = async () => {
+    if (!text.trim()) {
+      console.error("Text is empty, cannot generate script");
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      const response = await fetch("/api/generate-script", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: text }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        // After generating the script, proceed to Step 2 to generate the audio
+        handleGenerateAudio(data.script);  // Pass the script from response for audio generation
+      } else {
+        console.error("Error generating script:", data.error);
+      }
+    } catch (error) {
+      console.error("Error generating script:", error);
+    }
+  };
+
+  // Step 2: Generate Audio from Script
+  const handleGenerateAudio = async (script: string) => {
+    if (!script.trim()) {
+      console.error("Script is empty, cannot generate audio");
+      return;
+    }
+
     try {
       const response = await fetch("/api/voice", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text: script }),  // Pass script to generate audio
       });
 
       const data = await response.json();
       if (response.ok) {
-        setAudioUrl(data.audioUrl);
+        setAudioUrl(data.audioUrl); // Set the audio URL after generation
+        // Once audio is ready, proceed to Step 3
+        handleMergeVideo(data.audioUrl);  // Automatically call to merge with video
       } else {
         console.error("Error generating audio:", data.error);
       }
@@ -31,9 +68,10 @@ export function LeftPanel() {
     }
   };
 
-  const handleMergeVideo = async () => {
-    if (!audioUrl) {
-      console.error("Audio URL is missing");
+  // Step 3: Merge Audio with Video
+  const handleMergeVideo = async (audioUrl: string) => {
+    if (!audioUrl.trim()) {
+      console.error("Audio URL is empty, cannot merge video");
       return;
     }
 
@@ -48,12 +86,38 @@ export function LeftPanel() {
 
       const data = await response.json();
       if (response.ok) {
-        setVideoUrl(data.outputPath);
+        setVideoUrl(data.outputPath);  // Set the final video URL after merging audio with video
+        // Once video is ready, proceed to Step 4
+        handleAddCaptions(data.outputPath);  // Automatically call to add captions
       } else {
         console.error("Error merging video:", data.error);
       }
     } catch (error) {
       console.error("Error merging video:", error);
+    }
+  };
+
+  // Step 4: Add Captions to Video
+  const handleAddCaptions = async (videoUrl: string) => {
+    try {
+      const response = await fetch("/api/add-captions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ videoUrl }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setVideoUrl(data.videoUrl); // Set the video URL after adding captions
+      } else {
+        console.error("Error adding captions:", data.error);
+      }
+    } catch (error) {
+      console.error("Error adding captions:", error);
+    } finally {
+      setIsProcessing(false); // End processing once all steps are completed
     }
   };
 
@@ -63,10 +127,9 @@ export function LeftPanel() {
       return;
     }
 
-    // Create a temporary download link and trigger download
     const link = document.createElement("a");
-    link.href = `/public/videos/${videoUrl}`;  // Modify based on your actual video file path
-    link.download = "merged_video.mp4";  // Filename for the downloaded file
+    link.href = videoUrl;
+    link.download = "captioned_video.mp4";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -87,29 +150,25 @@ export function LeftPanel() {
         />
       </div>
       <button
-        onClick={handleGenerateAudio}
+        onClick={handleGenerateScript}
         className="bg-purple-600 text-white px-4 py-2 rounded-md"
+        disabled={isProcessing}
       >
-        Generate Audio
+        Generate Script and Audio
       </button>
-      {audioUrl && (
+      {audioUrl && !videoUrl && (
         <div>
-          <audio controls src={audioUrl} />
-          <button
-            onClick={handleMergeVideo}
-            className="bg-pink-600 text-white px-4 py-2 mt-4 rounded-md"
-          >
-            Merge with Video
-          </button>
+          <p>Audio generated. Merging video...</p>
         </div>
       )}
       {videoUrl && (
         <div>
+          <video controls src={videoUrl} />
           <button
             onClick={handleDownloadVideo}
             className="bg-green-600 text-white px-4 py-2 mt-4 rounded-md"
           >
-            Download Video
+            Download Captioned Video
           </button>
         </div>
       )}

@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest } from "next";
 import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
@@ -9,19 +9,22 @@ const API_KEY =
 const TEMPLATE_ID = "e7e758de-4eb4-460f-aeca-b2801ac7f8cc";
 const API_BASE = "https://api.zapcap.ai";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export async function POST(req: NextApiRequest) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return new Response(
+      JSON.stringify({ error: "Method Not Allowed" }),
+      { status: 405 }
+    );
   }
 
   try {
     const videoPath = path.join(process.cwd(), "public/videos/final_video.mp4");
 
     if (!fs.existsSync(videoPath)) {
-      return res.status(400).json({ error: "Input video not found" });
+      return new Response(
+        JSON.stringify({ error: "Input video not found" }),
+        { status: 400 }
+      );
     }
 
     // 1. Upload Video
@@ -75,7 +78,10 @@ export default async function handler(
     }
 
     if (!downloadUrl) {
-      return res.status(500).json({ error: "Captioning process timed out" });
+      return new Response(
+        JSON.stringify({ error: "Captioning process timed out" }),
+        { status: 500 }
+      );
     }
 
     // 4. Download the Video
@@ -94,12 +100,19 @@ export default async function handler(
     });
 
     console.log("Video saved to:", outputPath);
-    res.status(200).json({
-      message: "Captioned video saved",
-      videoUrl: "/videos/finalVideo.mp4",
-    });
+
+    return new Response(
+      JSON.stringify({
+        message: "Captioned video saved",
+        videoUrl: "/videos/finalVideo.mp4",
+      }),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return new Response(
+      JSON.stringify({ error: "Internal Server Error" }),
+      { status: 500 }
+    );
   }
 }

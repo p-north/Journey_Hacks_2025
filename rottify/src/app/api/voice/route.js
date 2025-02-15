@@ -5,7 +5,7 @@ import { ElevenLabsClient } from "elevenlabs";
 export async function POST(req) {
     try {
         const client = new ElevenLabsClient({
-            apiKey: "sk_7671f484eb1c943252ba07df5027c718c73d8f1a2b38993f" // Load API key securely
+            apiKey: "sk_622991d807c7f3cc54ad5a2df929434297b77c7a8af25ad6" // Load API key securely
         });
         //  console.log(client.apiKey);
         const { text } = await req.json(); // Get text input from frontend
