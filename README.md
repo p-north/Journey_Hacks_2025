@@ -19,7 +19,7 @@ Rottify turns text into viral-ready, high-energy microlearning videos using AI. 
 ## ⚙️ How It Works
 1. **Text Processing**: Perplexity Sonar analyzes and rewrites text into viral-friendly scripts.
 2. **Voiceover**: ElevenLabs generates energetic, AI-powered voiceovers.
-3. **Video Creation**: Remotion + FFmpeg syncs visuals, captions, and sound effects for TikTok-style videos.
+3. **Video Creation**: FFmpeg syncs visuals, ZapCap AI adds captions and visual effects for TikTok-style videos.
 
 ## 🏗️ Installation
 
