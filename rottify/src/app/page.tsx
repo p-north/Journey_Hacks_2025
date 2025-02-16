@@ -5,7 +5,6 @@ import { DashboardLayout } from "@/components/dashboard-layout";
 import { LeftPanel } from "@/components/left-panel";
 import { RightPanel } from "@/components/right-panel";
 import { ApiKeyInput } from "@/components/api-key-input";
-import { ActionButtons } from "@/components/action-buttons";
 
 export default function DashboardPage() {
   const [isApiKeyValid, setIsApiKeyValid] = useState(false);
@@ -13,7 +12,7 @@ export default function DashboardPage() {
   const [script, setScript] = useState("");
 
   const handleTextContent = (e: ChangeEvent) => {
-    setContent((e) => e.target.value);
+    setContent((e:any) => e.target.value);
   };
 
   const handleApiKeyValidation = (isValid: boolean) => {
@@ -49,7 +48,6 @@ export default function DashboardPage() {
         <LeftPanel />
         <RightPanel />
       </div>
-      <ActionButtons isEnabled={isApiKeyValid} />
     </DashboardLayout>
   );
 }

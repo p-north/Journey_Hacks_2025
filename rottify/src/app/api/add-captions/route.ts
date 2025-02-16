@@ -1,35 +1,34 @@
-import { NextApiRequest } from "next";
 import axios from "axios";
 import FormData from "form-data";
-import fs from "fs";
-import path from "path";
+
+import { NextRequest } from "next/server";
+import { supabase } from "@/lib/supabase";
+
 
 const API_KEY = process.env.ZAPCAP_KEY;
 const TEMPLATE_ID = "e7e758de-4eb4-460f-aeca-b2801ac7f8cc";
 const API_BASE = "https://api.zapcap.ai";
 
-export async function POST(req: NextApiRequest) {
+export async function POST(req: NextRequest) {
   if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method Not Allowed" }),
-      { status: 405 }
-    );
+    return new Response(JSON.stringify({ error: "Method Not Allowed" }), {
+      status: 405,
+    });
   }
 
   try {
-    const videoPath = path.join(process.cwd(), "public/final_video.mp4");
+    const { mergedPath } = await req.json();
 
-    if (!fs.existsSync(videoPath)) {
-      return new Response(
-        JSON.stringify({ error: "Input video not found" }),
-        { status: 400 }
-      );
+    if (!mergedPath) {
+      return new Response(JSON.stringify({ error: "Input video not found" }), {
+        status: 400,
+      });
     }
 
     // 1. Upload Video
     console.log("Uploading video...");
     const form = new FormData();
-    form.append("file", fs.createReadStream(videoPath));
+    form.append("file", mergedPath);
 
     const uploadResponse = await axios.post(`${API_BASE}/videos`, form, {
       headers: { "x-api-key": API_KEY, ...form.getHeaders() },
@@ -83,35 +82,57 @@ export async function POST(req: NextApiRequest) {
       );
     }
 
-    // 4. Download the Video
-    console.log("Downloading captioned video...");
-    const videoResponse = await axios.get(downloadUrl, {
-      responseType: "stream",
-    });
-
-    const outputPath = path.join(process.cwd(), "public/videos/finalVideo.mp4");
-    const writeStream = fs.createWriteStream(outputPath);
-
-    await new Promise<void>((resolve, reject) => {
-      videoResponse.data.pipe(writeStream);
-      writeStream.on("finish", resolve);
-      writeStream.on("error", reject);
-    });
-
-    console.log("Video saved to:", outputPath);
+    const outputPath = UploadAndFetchVideo(downloadUrl);
 
     return new Response(
       JSON.stringify({
         message: "Captioned video saved",
-        videoUrl: "/videos/finalVideo.mp4",
+        videoUrl: `${outputPath}`,
       }),
       { status: 200 }
     );
   } catch (error) {
     console.error("Error:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal Server Error" }),
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+    });
+  }
+}
+
+// save and retrieve from Supabase bucket
+async function UploadAndFetchVideo(downloadUrl: any) {
+  try {
+    // Download the video as a buffer
+    const videoResponse = await axios.get(downloadUrl, {
+      responseType: "arraybuffer",
+    });
+    const videoBuffer = Buffer.from(videoResponse.data);
+
+    // create a filename
+    const filename = `transcribedVid_${Date.now()}.mp4`;
+
+    // Upload the video as video buffer to Supabase bucket
+    const { data, error } = await supabase.storage
+      .from("Captioned")
+      .upload(filename, videoBuffer, {
+        contentType: "video/mp4",
+        cacheControl: "3600",
+        upsert: false, // Prevent overwriting
+      });
+
+    if (error) {
+      console.error("Error uploading the video to Supabase", error);
+      return null;
+    }
+
+    // Get the public url of the uploaded video
+    const { data: publicUrl } = supabase.storage
+      .from("Captioned")
+      .getPublicUrl(filename);
+
+    // return the public url
+    return publicUrl.publicUrl;
+  } catch (error) {
+    console.error("Error saving video:", error);
   }
 }
