@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import BarLoader from "react-spinners/BarLoader";
 
 export function LeftPanel() {
   const [text, setText] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(true);
 
   const handleTextChange = (e: any) => setText(e.target.value);
 
@@ -30,7 +31,7 @@ export function LeftPanel() {
       const data = await response.json();
       if (response.ok) {
         // After generating the script, proceed to Step 2 to generate the audio
-        handleGenerateAudio(data.script);  // Pass the script from response for audio generation
+        handleGenerateAudio(data.script); // Pass the script from response for audio generation
       } else {
         console.error("Error generating script:", data.error);
       }
@@ -52,14 +53,14 @@ export function LeftPanel() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: script }),  // Pass script to generate audio
+        body: JSON.stringify({ text: script }), // Pass script to generate audio
       });
 
       const data = await response.json();
       if (response.ok) {
         setAudioUrl(data.audioUrl); // Set the audio URL after generation
         // Once audio is ready, proceed to Step 3
-        handleMergeVideo(data.audioUrl);  // Automatically call to merge with video
+        handleMergeVideo(data.audioUrl); // Automatically call to merge with video
       } else {
         console.error("Error generating audio:", data.error);
       }
@@ -86,9 +87,9 @@ export function LeftPanel() {
 
       const data = await response.json();
       if (response.ok) {
-        setVideoUrl(data.outputPath);  // Set the final video URL after merging audio with video
+        // setVideoUrl(data.outputPath);  // Set the final video URL after merging audio with video
         // Once video is ready, proceed to Step 4
-        handleAddCaptions(data.outputPath);  // Automatically call to add captions
+        handleAddCaptions(data.outputPath); // Automatically call to add captions
       } else {
         console.error("Error merging video:", data.error);
       }
@@ -137,29 +138,38 @@ export function LeftPanel() {
 
   return (
     <div className="w-full md:w-1/2 space-y-6 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-lg">
-      <div>
-        <Label htmlFor="text-input" className="text-lg font-medium mb-2 block text-pink-600 dark:text-pink-400">
-          Inject Your Thoughts
-        </Label>
-        <Textarea
-          id="text-input"
-          placeholder="Pour your brain juice here..."
-          value={text}
-          onChange={handleTextChange}
-          className="bg-neutral-100 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 focus:ring-purple-500 focus:border-purple-500 h-40"
-        />
-      </div>
-      <button
-        onClick={handleGenerateScript}
-        className="bg-purple-600 text-white px-4 py-2 rounded-md"
-        disabled={isProcessing}
-      >
-        Generate Script and Audio
-      </button>
-      {audioUrl && !videoUrl && (
-        <div>
-          <p>Audio generated. Merging video...</p>
+      {isProcessing ? (
+        <div className="p-6 ml-4">
+          <p>Processing...</p>
+          <BarLoader color={"#8E24AA"} loading={isProcessing} className="scale-150"/>
         </div>
+      ) : (
+        <>
+          <div>
+            <Label
+              htmlFor="text-input"
+              className="text-lg font-medium mb-2 block text-pink-600 dark:text-pink-400"
+            >
+              Inject Your Thoughts
+            </Label>
+            <Textarea
+              id="text-input"
+              placeholder="Pour your brain juice here..."
+              value={text}
+              onChange={handleTextChange}
+              className="bg-neutral-100 dark:bg-neutral-700 border-neutral-300 dark:border-neutral-600 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 focus:ring-purple-500 focus:border-purple-500 h-40"
+            />
+          </div>
+          <div>
+            <button
+              onClick={handleGenerateScript}
+              className="bg-purple-600 text-white px-4 py-2 rounded-md"
+              disabled={isProcessing}
+            >
+              Generate Video
+            </button>
+          </div>
+        </>
       )}
       {videoUrl && (
         <div>
