@@ -7,7 +7,7 @@ export function LeftPanel() {
   const [text, setText] = useState("");
   const [audioUrl, setAudioUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleTextChange = (e: any) => setText(e.target.value);
 

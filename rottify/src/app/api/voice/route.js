@@ -3,7 +3,6 @@ import { ElevenLabsClient } from "elevenlabs";
 export async function POST(req) {
     try {
         const ELEVEN_LABS_KEY = process.env.ELEVEN_LABS_KEY;
-        console.log(ELEVEN_LABS_KEY);
         const client = new ElevenLabsClient({
             apiKey: ELEVEN_LABS_KEY // Load API key securely
         });

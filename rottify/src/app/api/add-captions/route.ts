@@ -17,18 +17,22 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { mergedPath } = await req.json();
+    const { videoUrl } = await req.json();
 
-    if (!mergedPath) {
+    if (!videoUrl) {
       return new Response(JSON.stringify({ error: "Input video not found" }), {
         status: 400,
       });
     }
 
+    // Downloading video from Supabase
+    const vidRes = await axios.get(videoUrl, {responseType: "stream"});
+
+
     // 1. Upload Video
     console.log("Uploading video...");
     const form = new FormData();
-    form.append("file", mergedPath);
+    form.append("file", vidRes.data);
 
     const uploadResponse = await axios.post(`${API_BASE}/videos`, form, {
       headers: { "x-api-key": API_KEY, ...form.getHeaders() },
@@ -82,7 +86,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const outputPath = UploadAndFetchVideo(downloadUrl);
+    const outputPath = await UploadAndFetchVideo(downloadUrl);
 
     return new Response(
       JSON.stringify({
