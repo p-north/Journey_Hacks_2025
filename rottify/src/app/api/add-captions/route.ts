@@ -4,8 +4,7 @@ import FormData from "form-data";
 import fs from "fs";
 import path from "path";
 
-const API_KEY =
-  "929d933d4e5e414ca87b640270c3f8570b127488212630f642c7af00cf9a3557";
+const API_KEY = process.env.ZAPCAP_KEY;
 const TEMPLATE_ID = "e7e758de-4eb4-460f-aeca-b2801ac7f8cc";
 const API_BASE = "https://api.zapcap.ai";
 

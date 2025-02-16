@@ -1,11 +1,11 @@
 import { ElevenLabsClient } from "elevenlabs";
 
-
-
 export async function POST(req) {
     try {
+        const ELEVEN_LABS_KEY = process.env.ELEVEN_LABS_KEY;
+        console.log(ELEVEN_LABS_KEY);
         const client = new ElevenLabsClient({
-            apiKey: "sk_622991d807c7f3cc54ad5a2df929434297b77c7a8af25ad6" // Load API key securely
+            apiKey: ELEVEN_LABS_KEY // Load API key securely
         });
         //  console.log(client.apiKey);
         const { text } = await req.json(); // Get text input from frontend
@@ -21,7 +21,8 @@ export async function POST(req) {
         const voiceId = "JBFqnCBsd6RMkjVDRZzb"; // Your ElevenLabs voice ID
         const modelId = "eleven_multilingual_v2";
         const outputFormat = "mp3_22050_32";
-
+        
+        // convert for TTS
         const responseStream = await client.textToSpeech.convert(voiceId, {
             output_format: outputFormat,
             text: text,

@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const PERPLEXITY_KEY = process.env.PERPLEXITY_KEY;
     const body = await req.json();
     const { content } = body;
     console.log(content);
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         Authorization:
-          "Bearer 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",
+          `Bearer ${PERPLEXITY_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
