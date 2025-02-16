@@ -16,25 +16,22 @@ export async function POST(req) {
         }
 
         // Upload the audio file to Supabase
-        const audioPath = UploadAudioToSupabase(audioUrl);
+        const audioPath = await UploadAudioToSupabase(audioUrl);
+        if (!audioPath) return new Response("Audio upload failed", { status: 500 });
         console.log("✅ Audio file saved:", audioPath);
 
         // Step 2: Get a list of default video files from Supabase bucket
-        const randomVidUrl = getRandomDefaultVideo();
+        const randomVidUrl =  await getRandomDefaultVideo();
+        if (!randomVidUrl) return new Response("Video fetch failed", { status: 500 });
         console.log("Default video url: ", randomVidUrl)
         
 
-        // Step 3: Define file paths
-        const videoPath = randomVidUrl;
-
-        const mergedPath = mergeAndUploadFinal(videoPath, audioPath);
+        const mergedPath = await mergeAndUploadFinal(randomVidUrl.data.publicUrl, audioPath.data.publicUrl);
     
 
-        return new Promise((resolve) => {    
-            console.log("✅ Video and audio merged successfully.");
-            resolve(new Response(JSON.stringify({ outputPath: `${mergedPath}` }), { status: 200 }));
-                
-        });
+        return new Response(    
+           JSON.stringify({ outputPath: `${mergedPath.data.publicUrl}` }), { status: 200 });
+
     } catch (error) {
         console.error("❌ Error merging video and audio:", error);
         return new Response("Error merging video and audio", { status: 500 });
@@ -64,9 +61,9 @@ async function UploadAudioToSupabase(base64Audio) {
 
 
         // get the public url of audio
-        const { data: publicUrl } = supabase.storage.from("Speech").getPublicUrl(filename);
-        console.log("Audio uploaded sucessfully:", publicUrl.publicUrl);
-        return publicUrl.publicUrl;
+        const publicUrl  = supabase.storage.from("Speech").getPublicUrl(filename);
+        console.log("Audio uploaded sucessfully:", publicUrl);
+        return publicUrl;
     
     } catch (error) {
         console.error("Error processing the audio: ", error);
@@ -78,27 +75,36 @@ async function UploadAudioToSupabase(base64Audio) {
 
 // get a random video from Supabase bucket
 async function getRandomDefaultVideo() {
-    // Get list of video files from Supabase storage
-    const { data, error} = await supabase.storage.from("DefaultVids").list();
-
-    if(error){
-        console.error("Error fetching video from Supabase", error);
-        return null;
+    try {
+        
+    
+        // Get list of video files from Supabase storage
+        const { data, error} = await supabase.storage.from("DefaultVids").list();
+        
+        if(error){
+            console.error("Error fetching video from Supabase", error);
+            return null;
+        }
+        
+        if(!data || data.length == 0){
+            console.error("No videos found in bucket");
+            return null;
+        }
+        
+        // pick a random video from the list
+        const randomVideo = data[Math.floor(Math.random()*data.length)].name;
+        console.log("Selected default video", randomVideo);
+        
+        // get the public url for the random video
+        const publicUrl  = supabase.storage.from("DefaultVids").getPublicUrl(randomVideo);
+        return publicUrl; 
     }
-
-    if(!data || data.length == 0){
-        console.error("No videos found in bucket");
-        return null;
+    catch (error) {
+        console.error("Error fetching the video: ", error);
+        return null; 
+    
+        
     }
-
-    // pick a random video from the list
-    const randomVideo = data[Math.floor(Math.random()*data.length)].name;
-    console.log("Selected default video", randomVideo);
-
-    // get the public url for the random video
-    const { data: publicUrl } = supabase.storage.from("DefaultVids").getPublicUrl(randomVideo);
-
-    return publicUrl.publicUrl; 
 }
 
 // merge and upload the final video
@@ -133,17 +139,17 @@ async function mergeAndUploadFinal(videoPath, audioPath) {
         }
 
         // get public url
-        const { data:publicUrl } = supabase.storage.from("FinalVid").getPublicUrl(outputFileName);
-        console.log("Final video uploaded: ", publicUrl.publicUrl);
+        const publicUrl  = supabase.storage.from("FinalVid").getPublicUrl(outputFileName);
+        console.log("Final video uploaded: ", publicUrl);
 
 
         // Delete temp local file
         fs.unlinkSync(outputPath);
         console.log("Temp file deleted");
-        return publicUrl.publicUrl;
+        return publicUrl;
 
     } catch (error) {
-        console.error("❌ Error merging and uploading video:", err);
+        console.error("❌ Error merging and uploading video:", error);
         return null;
         
     }

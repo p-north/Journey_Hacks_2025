@@ -9,14 +9,6 @@ export async function POST(req) {
         });
         //  console.log(client.apiKey);
         const { text } = await req.json(); // Get text input from frontend
-        // if (!client.apiKey) {
-        //     console.error("🚨 Missing ElevenLabs API Key!");
-        //     return new Response(JSON.stringify({ error: "Server misconfiguration: API key missing" }), {
-        //         status: 500,
-        //         headers: { "Content-Type": "application/json" },
-        //     });
-        // }
-
         // console.log("🔑 Using API Key:", client.apiKey.slice(0, 5) + "*****"); // Log only first 5 characters for debugging
         const voiceId = "JBFqnCBsd6RMkjVDRZzb"; // Your ElevenLabs voice ID
         const modelId = "eleven_multilingual_v2";
