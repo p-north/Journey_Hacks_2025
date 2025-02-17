@@ -1,5 +1,5 @@
 
-# Rottify: Brainrot Video Generator
+# Rottify: AI-Powered Text-to-Video Generator
 
 Rottify turns text into viral-ready, high-energy microlearning videos using AI. Automatically create engaging content with AI voiceovers, captions, and meme-like visuals.
 
