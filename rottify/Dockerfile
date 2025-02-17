@@ -30,7 +30,7 @@ COPY --from=builder /app/public public
 RUN npm install --omit=dev
 
 # Port
-EXPOSE 3001
+EXPOSE 3000
 
 # Start the next app
 CMD [ "npm", "run", "start" ]
