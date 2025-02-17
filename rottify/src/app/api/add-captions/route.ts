@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
 }
 
 // save and retrieve from Supabase bucket
-async function UploadAndFetchVideo(downloadUrl: any) {
+async function UploadAndFetchVideo(downloadUrl: string) {
   try {
     // Download the video as a buffer
     const videoResponse = await axios.get(downloadUrl, {
@@ -116,7 +116,7 @@ async function UploadAndFetchVideo(downloadUrl: any) {
     const filename = `transcribedVid_${Date.now()}.mp4`;
 
     // Upload the video as video buffer to Supabase bucket
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("Captioned")
       .upload(filename, videoBuffer, {
         contentType: "video/mp4",

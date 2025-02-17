@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import BarLoader from "react-spinners/BarLoader";
@@ -9,7 +9,7 @@ export function LeftPanel() {
   const [videoUrl, setVideoUrl] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleTextChange = (e: any) => setText(e.target.value);
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value);
 
   // Step 1: Generate Script from Text
   const handleGenerateScript = async () => {
@@ -60,7 +60,7 @@ export function LeftPanel() {
       if (response.ok) {
         setAudioUrl(data.audioUrl); // Set the audio URL after generation
         // Once audio is ready, proceed to Step 3
-        handleMergeVideo(data.audioUrl); // Automatically call to merge with video
+        handleMergeVideo(audioUrl); // Automatically call to merge with video
       } else {
         console.error("Error generating audio:", data.error);
       }

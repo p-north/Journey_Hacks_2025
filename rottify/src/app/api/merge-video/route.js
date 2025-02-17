@@ -48,7 +48,7 @@ async function UploadAudioToSupabase(base64Audio) {
         const filename = `speech_${Date.now()}.wav`;
 
         // Step 3: upload to Supabase storage
-        const { data, error } = await supabase.storage.from("Speech").upload(filename, audioBuffer, {
+        const { error } = await supabase.storage.from("Speech").upload(filename, audioBuffer, {
             contentType: "audio/wav",
             cacheControl: "3600",
             upsert: false, // Prevent overwriting existing files
@@ -127,7 +127,7 @@ async function mergeAndUploadFinal(videoPath, audioPath) {
         const videoBuffer = fs.readFileSync(outputPath);
 
         // Upload to Supabase
-        const {data, error} = await supabase.storage.from("FinalVid").upload(outputFileName, videoBuffer, {
+        const { error } = await supabase.storage.from("FinalVid").upload(outputFileName, videoBuffer, {
             contentType: "video/mp4",
             cacheControl: "3600",
             upsert: false, // Prevent overwriting existing
