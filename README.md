@@ -10,9 +10,9 @@ Rottify turns text into viral-ready, high-energy microlearning videos using AI. 
 - **Optimized Performance**: Edge-cached for 3x faster processing.
 
 ## 🛠️ Tech Stack
-- **Frontend**: Next.js, TypeScript
+- **Frontend**: Next.js, TypeScript, Tailwind
 - **Backend**: Supabase
-- **AI Models**: Perplexity Sonar, ElevenLabs
+- **AI Models**: Perplexity Sonar, ElevenLabs 
 - **Video Processing**: FFmpeg, ZapCapAI
 - **Containerization**: Docker
 
