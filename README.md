@@ -6,7 +6,7 @@ Rottify turns text into viral-ready, high-energy microlearning videos using AI. 
 ## 🚀 Features
 - **Text-to-Video**: Converts text into ~40-second, TikTok-style videos.
 - **AI Voiceovers**: Gen-Z-style narrations with custom voice presets.
-- **Video Synthesis**: Dynamic captions and effects using Remotion + FFmpeg.
+- **Video Synthesis**: Dynamic captions and effects using ZapCapAI + FFmpeg.
 - **Optimized Performance**: Edge-cached for 3x faster processing.
 
 ## 🛠️ Tech Stack
