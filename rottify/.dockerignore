@@ -1,0 +1,10 @@
+node_modules
+.next/cache
+.DS_Store
+.git
+.env*
+# vercel
+.vercel
+# typescript
+*.tsbuildinfo
+next-env.d.ts
